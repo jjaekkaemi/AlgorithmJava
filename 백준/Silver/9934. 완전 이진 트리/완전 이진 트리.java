@@ -1,55 +1,47 @@
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Scanner;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+
 
 public class Main {
-    static int K, N;
-    static int[] arr;
-    static int cnt ;
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        K = sc.nextInt();
-        N = (int)Math.pow(2, K)-1 ;
-        cnt = 0 ;
-        arr = new int[N];
-        for (int i = 0; i < N; i++) {
-            arr[i] = sc.nextInt();
+    static int K, size;
+    static int[] num;
+    static ArrayList<Integer>[] tree;
+    public static void main(String[] args) throws IOException{
+        //입력값 처리하는 BufferedReader
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        //결과값 출력하는 BufferedWriter
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
+        K = Integer.parseInt(br.readLine());
+        StringTokenizer st = new StringTokenizer(br.readLine()," ");
+        size = (int)(Math.pow(2, K) - 1);
+        tree = new ArrayList[K+1];
+        num = new int[size+1];
+        for(int i=0;i<=K;i++)
+            tree[i] = new ArrayList<>();
+        int index = 1;
+        //중위 순회 탐색 정보 배열에 저장
+        while(st.hasMoreTokens())
+            num[index++] = Integer.parseInt(st.nextToken());
+        search(1, 1, size);		//중위 순회 특성 이용한 Left, Right 나누기
+        //각 층에 빌딩 정보 BufferedWriter 저장
+        for(int i=1;i<=K;i++){
+            for(int j=0;j<tree[i].size();j++)
+                bw.write(tree[i].get(j) + " ");
+            bw.newLine();
         }
-        Queue<int[]> queue = new LinkedList<>();
-        queue.offer(new int[]{0, N-1, 0});
-        while(!queue.isEmpty()){
-            int[] num = queue.poll();
-
-            int st = num[0];
-            int en = num[1];
-            int depth = num[2];
-            int mid = (st+en)/2;
-            System.out.print(arr[mid]+" ");
-            if(++cnt==(int)Math.pow(2,depth)) {
-                System.out.println();
-                cnt = 0;
-            }
-            if(st>=en) continue;
-            queue.offer(new int[]{st, mid-1, depth+1});
-            queue.offer(new int[]{mid+1, en, depth+1});
-        }
-        //binarySearch(0, N-1, 0);
+        bw.flush();		//결과 출력
+        bw.close();
+        br.close();
     }
-    public static void binarySearch(int st, int en, int depth ){
-
-        int mid = (st+en)/2;
-        System.out.print(arr[mid]+" ");
-        if(++cnt==(int)Math.pow(2,depth)) {
-            cnt =0;
-            System.out.println();
-        }
-
-        if(st>=en) return;
-        binarySearch(st, mid-1, depth+1);
-        binarySearch(mid+1, en, depth+1);
+    //중위 순회 특성 이용한 레벨에 맞는 빌딩 값들 저장 함수
+    static void search(int depth, int start, int end){
+        int mid = (start + end)/2;		//Root
+        tree[depth].add(num[mid]);
+        if(depth == K)		//단말 노드일 때
+            return;
+        search(depth+1, start, mid-1);	//Left
+        search(depth+1, mid+1, end);	//Right
     }
-
-
-
 }
 
