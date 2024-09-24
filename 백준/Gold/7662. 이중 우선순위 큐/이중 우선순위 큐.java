@@ -1,74 +1,62 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.PriorityQueue;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        int T = Integer.parseInt(br.readLine()); // 테스트 케이스 수
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        int testCases = Integer.parseInt(reader.readLine());
 
-        StringBuilder result = new StringBuilder();
-        for (int t = 0; t < T; t++) {
-            int k = Integer.parseInt(br.readLine()); // 연산의 개수
-            PriorityQueue<Integer> minQueue = new PriorityQueue<>(); // 최소값 우선순위 큐
-            PriorityQueue<Integer> maxQueue = new PriorityQueue<>(Collections.reverseOrder()); // 최대값 우선순위 큐
-            HashMap<Integer, Integer> map = new HashMap<>(); // 숫자의 삽입/삭제 카운트 관리
+        for (int t = 0; t < testCases; t++) {
+            int operations = Integer.parseInt(reader.readLine());
+            Map<Integer, Integer> frequencyMap = new HashMap<>();
+            PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+            PriorityQueue<Integer> maxHeap = new PriorityQueue<>(Collections.reverseOrder());
 
-            for (int i = 0; i < k; i++) {
-                StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-                String command = st.nextToken();
-                int num = Integer.parseInt(st.nextToken());
+            for (int i = 0; i < operations; i++) {
+                String[] command = reader.readLine().split(" ");
+                char action = command[0].charAt(0);
+                int value = Integer.parseInt(command[1]);
 
-                if (command.equals("I")) {
-                    // 삽입 연산
-                    minQueue.add(num);
-                    maxQueue.add(num);
-                    map.put(num, map.getOrDefault(num, 0) + 1);
+                if (action == 'I') {
+                    frequencyMap.put(value, frequencyMap.getOrDefault(value, 0) + 1);
+                    minHeap.offer(value);
+                    maxHeap.offer(value);
                 } else {
-                    // 삭제 연산
-                    if (num == 1) {
-                        delete(maxQueue, map); // 최대값 삭제
-                    } else {
-                        delete(minQueue, map); // 최소값 삭제
-                    }
+                    if (frequencyMap.isEmpty()) continue;
+
+                    PriorityQueue<Integer> targetHeap = (value == 1) ? maxHeap : minHeap;
+                    cleanHeap(targetHeap, frequencyMap);
                 }
             }
 
-            // 유효한 값들로 큐를 정리
-            cleanQueue(maxQueue, map);
-            cleanQueue(minQueue, map);
-
-            if (maxQueue.isEmpty() || minQueue.isEmpty()) {
-                result.append("EMPTY\n");
+            if (frequencyMap.isEmpty()) {
+                System.out.println("EMPTY");
             } else {
-                result.append(maxQueue.peek()).append(" ").append(minQueue.peek()).append("\n");
+                int maxVal = cleanHeap(maxHeap, frequencyMap);
+                int minVal = frequencyMap.isEmpty() ? maxVal : cleanHeap(minHeap, frequencyMap);
+                System.out.println(maxVal + " " + minVal);
             }
-        }
-
-        System.out.print(result.toString());
-    }
-
-    // 해당 큐에서 유효하지 않은 값을 모두 제거하는 메소드
-    private static void cleanQueue(PriorityQueue<Integer> queue, HashMap<Integer, Integer> map) {
-        while (!queue.isEmpty() && map.getOrDefault(queue.peek(), 0) == 0) {
-            queue.poll();
         }
     }
 
-    // 큐에서 최상위 값을 삭제하고 map의 카운트를 감소시키는 메소드
-    private static void delete(PriorityQueue<Integer> queue, HashMap<Integer, Integer> map) {
-        while (!queue.isEmpty()) {
-            int value = queue.poll();
-            int count = map.getOrDefault(value, 0);
+    // 특정 힙에서 유효한 값을 꺼내는 메서드
+    static int cleanHeap(PriorityQueue<Integer> heap, Map<Integer, Integer> freqMap) {
+        int element;
+        while (true) {
+            element = heap.poll();
+            int count = freqMap.getOrDefault(element, 0);
 
-            if (count > 0) {
-                map.put(value, count - 1);
-                break;
+            if (count == 0) continue;
+
+            if (count == 1) {
+                freqMap.remove(element);
+            } else {
+                freqMap.put(element, count - 1);
             }
+            break;
         }
+        return element;
     }
 }
