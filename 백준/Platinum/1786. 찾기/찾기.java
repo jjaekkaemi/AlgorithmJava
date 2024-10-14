@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,45 +6,58 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String t = br.readLine(); // 텍스트
-        String p = br.readLine(); // 패턴
-
-        int len = p.length();
+        String t = br.readLine();
+        String p = br.readLine();
+        int len = p.length() ;
         int tLen = t.length();
-        int[] table = new int[len]; // LPS 테이블 생성
-
-        // LPS 테이블 계산
-        int j = 0;
-        for (int i = 1; i < len; i++) {
-            while (j > 0 && p.charAt(i) != p.charAt(j)) {
-                j = table[j - 1];
-            }
-            if (p.charAt(i) == p.charAt(j)) {
-                table[i] = ++j;
-            }
-        }
-
-        List<Integer> list = new ArrayList<>();
-        j = 0;
-
-        // 패턴 매칭 수행
-        for (int i = 0; i < tLen; i++) {
-            while (j > 0 && t.charAt(i) != p.charAt(j)) {
-                j = table[j - 1];
-            }
-            if (t.charAt(i) == p.charAt(j)) {
+        int[] table = new int[p.length()];
+        table[0] = 0;
+        int j = 0 ;
+        int i = 1 ;
+        int check = 0 ;
+        while(i<len){
+            if(p.charAt(i)==p.charAt(j)){
+                table[i] = ++check;
                 j++;
-            }
-            if (j == len) { // 패턴 전체가 일치했을 때
-                list.add(i - len + 2); // 1-based 인덱스 보정
-                j = table[j - 1]; // 다음 탐색을 위해 j 초기화
+                i++;
+            } else {
+                if(j==0) {
+                    table[i] = 0;
+                    i++;
+                } else {
+                    j = table[j-1];
+                    check = j ;
+                }
             }
         }
+        i = 0 ;
+        j = 0 ;
+        check = 0 ;
+        int answer = 0 ;
+        List<Integer> list = new ArrayList<>();
+        while(i<tLen){
+            if(t.charAt(i)==p.charAt(j)){
+                check++;
+                i++;
+                j++;
+            } else {
+                if(j==0){
+                    i++;
+                } else {
+                    j = table[j-1];
+                    check = j ;
+                }
 
-        // 결과 출력
+            }
+            if(check==len){
+                j = table[j-1];
+                check = j ;
+                list.add(i-len+1);
+            }
+        }
         System.out.println(list.size());
-        for (int idx : list) {
-            System.out.print(idx + " ");
+        for(int a : list){
+            System.out.print(a+" ");
         }
     }
 }
