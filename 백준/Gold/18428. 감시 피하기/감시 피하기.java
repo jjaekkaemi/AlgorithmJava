@@ -1,3 +1,4 @@
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -7,8 +8,7 @@ public class Main {
     static char[][] corridor;
     static List<int[]> teachers = new ArrayList<>();
     static List<int[]> empties = new ArrayList<>();
-    static int[] dx = {-1, 1, 0, 0}; // 상, 하, 좌, 우
-    static int[] dy = {0, 0, -1, 1};
+    static int[][] move = {{-1,0},{1,0},{0,-1},{0,1}};
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -63,12 +63,11 @@ public class Main {
 
     // 특정 선생님이 4방향으로 감시하는 메서드
     static boolean checkTeacher(int x, int y) {
-        for (int dir = 0; dir < 4; dir++) {
+        for(int[] m : move){
             int nx = x, ny = y;
-            while (true) {
-                nx += dx[dir];
-                ny += dy[dir];
-                
+            while(true){
+                nx+=m[0];
+                ny+=m[1];
                 if (nx < 0 || nx >= N || ny < 0 || ny >= N || corridor[nx][ny] == 'O') break;
                 if (corridor[nx][ny] == 'S') return false; // 학생이 감시에 노출된 경우
             }
